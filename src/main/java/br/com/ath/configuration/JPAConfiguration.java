@@ -16,7 +16,7 @@ public class JPAConfiguration {
     public DataSource dataSource() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
         dataSourceBuilder.driverClassName("com.mysql.cj.jdbc.Driver");
-        dataSourceBuilder.url("jdbc:mysql://localhost:3306/eventos?useTimezone=true&serverTimezone=UTC");
+        dataSourceBuilder.url("jdbc:mysql://localhost:3306/auth?useTimezone=true&serverTimezone=UTC");
         dataSourceBuilder.username(USERNAME);
         dataSourceBuilder.password(PASSWORD);
         return dataSourceBuilder.build();
