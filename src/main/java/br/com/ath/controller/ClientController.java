@@ -22,9 +22,4 @@ public class ClientController {
     public ResponseEntity<Boolean> createLogin(@RequestBody(required = true) ClientDTO request) throws DuplicateClientException {
        return ResponseEntity.ok().body(service.registerClient(request));
     }
-
-    @GetMapping("/teste")
-    public ResponseEntity<String> teste() {
-        return ResponseEntity.ok("TESTE");
-    }
 }
