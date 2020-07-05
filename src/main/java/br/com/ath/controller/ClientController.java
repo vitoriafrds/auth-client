@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/create")
+@RequestMapping("api/v1/create")
 public class ClientController {
 
     private ClientService service;
@@ -21,5 +21,10 @@ public class ClientController {
     @PostMapping
     public ResponseEntity<Boolean> createLogin(@RequestBody(required = true) ClientDTO request) throws DuplicateClientException {
        return ResponseEntity.ok().body(service.registerClient(request));
+    }
+
+    @GetMapping()
+    public ResponseEntity<String> teste() {
+        return ResponseEntity.ok().body("TESTANDO API");
     }
 }

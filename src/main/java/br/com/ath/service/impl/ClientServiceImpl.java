@@ -19,6 +19,7 @@ public class ClientServiceImpl implements ClientService {
     @Autowired
     public ClientServiceImpl(ClientRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
