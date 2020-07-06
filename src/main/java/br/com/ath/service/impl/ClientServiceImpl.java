@@ -34,8 +34,6 @@ public class ClientServiceImpl implements ClientService {
         if (verifyEmail(request.getLogin())) {
             throw new DuplicateClientException("login already registered");
         }
-        client.setPassword(passwordEncoder.encode(request.getPassword()));
-
         repository.save(client);
         log.info("USER CREATED");
 
@@ -45,17 +43,18 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public boolean authenticate(String login, String password) throws NotAuthenticatedException {
 
-        Optional<Client> informations = repository.findByLoginAndPassword(login, password);
+        Optional<Client> informations = repository.findByLogin(login);
 
-        if(informations.isPresent()) {
-            log.info("USER AUTENTICATE");
-            return true;
+        if (informations.isPresent()) {
+            if (informations.get().getPassword().equals(password)) {
+                log.info("USER AUTENTICATE");
+                return true;
+            }
         } else {
             throw new NotAuthenticatedException("INCORRECT PASSWORD OR LOGIN");
         }
-
+        return false;
     }
-
 
 
     private boolean verifyEmail(String login) {

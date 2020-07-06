@@ -11,5 +11,5 @@ public interface ClientRepository extends JpaRepository<Client, Integer> {
 
     boolean existsByLogin(String login);
 
-    Optional<Client> findByLoginAndPassword(String login, String password);
+    Optional<Client> findByLogin(String login);
 }
