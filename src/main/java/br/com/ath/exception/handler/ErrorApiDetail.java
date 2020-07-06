@@ -15,15 +15,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ErrorApiDetail {
 
-    private String title;
     private HttpStatus status;
     private String detail;
     private LocalDate timestamp;
 
 
-    public ErrorApiDetail(String title, HttpStatus status, String detail, LocalDate timestamp) {
+    public ErrorApiDetail(HttpStatus status, String detail, LocalDate timestamp) {
         this.timestamp = timestamp;
-        this.title = title;
         this.status = status;
         this.detail = detail;
     }

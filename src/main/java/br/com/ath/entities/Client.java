@@ -27,4 +27,5 @@ public class Client {
         this.login = dto.getLogin();
         this.password = dto.getPassword();
     }
+
 }

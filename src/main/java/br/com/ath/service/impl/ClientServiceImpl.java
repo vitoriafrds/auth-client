@@ -6,11 +6,16 @@ import br.com.ath.exception.DuplicateClientException;
 import br.com.ath.exception.NotAuthenticatedException;
 import br.com.ath.repository.ClientRepository;
 import br.com.ath.service.ClientService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Optional;
 
 @Service
+@Slf4j
 public class ClientServiceImpl implements ClientService {
 
     private ClientRepository repository;
@@ -26,13 +31,13 @@ public class ClientServiceImpl implements ClientService {
     public boolean registerClient(ClientDTO request) throws DuplicateClientException {
         Client client = new Client(request);
 
-        if(verifyEmail(request.getLogin())) {
+        if (verifyEmail(request.getLogin())) {
             throw new DuplicateClientException("login already registered");
         }
-
         client.setPassword(passwordEncoder.encode(request.getPassword()));
 
         repository.save(client);
+        log.info("USER CREATED");
 
         return true;
     }
@@ -40,14 +45,18 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public boolean authenticate(String login, String password) throws NotAuthenticatedException {
 
-        boolean authentication = repository.existsByLoginAndPassword(login, password);
+        Optional<Client> informations = repository.findByLoginAndPassword(login, password);
 
-        if(!authentication) {
-            throw new NotAuthenticatedException("incorrect password or login");
+        if(informations.isPresent()) {
+            log.info("USER AUTENTICATE");
+            return true;
+        } else {
+            throw new NotAuthenticatedException("INCORRECT PASSWORD OR LOGIN");
         }
 
-        return true;
     }
+
+
 
     private boolean verifyEmail(String login) {
         return repository.existsByLogin(login);

@@ -1,6 +1,7 @@
 package br.com.ath.exception.handler;
 
 import br.com.ath.exception.DuplicateClientException;
+import br.com.ath.exception.NotAuthenticatedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,7 +18,17 @@ public class HandlerController {
         ErrorApiDetail error = ErrorApiDetail.builder().timestamp(LocalDate.now())
                 .detail(duplicateClientException.getMessage())
                 .status(HttpStatus.BAD_REQUEST)
-                .title("login already registered")
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotAuthenticatedException.class)
+    public ResponseEntity<ErrorApiDetail> handlerNotAuthenticationExcpetion(NotAuthenticatedException notAuthenticatedException) {
+
+        ErrorApiDetail error = ErrorApiDetail.builder().timestamp(LocalDate.now())
+                .detail(notAuthenticatedException.getMessage())
+                .status(HttpStatus.BAD_REQUEST)
                 .build();
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
