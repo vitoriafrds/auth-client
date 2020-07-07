@@ -21,6 +21,7 @@ public class Client {
     private String name;
     private String login;
     private String password;
+    private String role;
 
     public Client(ClientDTO dto){
         this.name = dto.getUsername();
