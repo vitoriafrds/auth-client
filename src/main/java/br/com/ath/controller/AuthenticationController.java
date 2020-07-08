@@ -16,12 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
     private ClientService clientService;
-    private PasswordEncoder encoder;
 
     @Autowired
     public AuthenticationController(ClientService service, PasswordEncoder encoder) {
         this.clientService = service;
-        this.encoder = encoder;
     }
 
     @GetMapping()
