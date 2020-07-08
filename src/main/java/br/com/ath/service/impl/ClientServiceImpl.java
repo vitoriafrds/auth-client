@@ -8,6 +8,7 @@ import br.com.ath.exception.DuplicateClientException;
 import br.com.ath.exception.NotAuthenticatedException;
 import br.com.ath.repository.ClientRepository;
 import br.com.ath.service.ClientService;
+import br.com.ath.utils.HashingUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Optional;
 
 @Service
@@ -22,12 +24,12 @@ import java.util.Optional;
 public class ClientServiceImpl implements ClientService {
 
     private ClientRepository repository;
-    private PasswordEncoder passwordEncoder;
+    private HashingUtils hash;
 
     @Autowired
-    public ClientServiceImpl(ClientRepository repository, PasswordEncoder passwordEncoder) {
+    public ClientServiceImpl(ClientRepository repository, HashingUtils hash) {
         this.repository = repository;
-        this.passwordEncoder = passwordEncoder;
+        this.hash = hash;
     }
 
     @Override
@@ -37,6 +39,13 @@ public class ClientServiceImpl implements ClientService {
         if (verifyEmail(request.getLogin())) {
             throw new DuplicateClientException(AuthResponseEnum.USER_ALREADY_EXISTS.getMessage());
         }
+
+        byte[] password = hash.hashingPassword(request.getPassword());
+
+        String hashingPassword = hash.convertToHexadecimal(password);
+
+        client.setPassword(hashingPassword);
+
         repository.save(client);
         log.info("USER CREATED");
 
@@ -46,12 +55,14 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public AuthClientResponseDTO authenticate(String login, String password) throws NotAuthenticatedException {
 
-        Optional<Client> informations = repository.findByLogin(login);
         AuthClientResponseDTO response = new AuthClientResponseDTO();
 
+        Optional<Client> informations = repository.findByLogin(login);
+        byte[] userPassword = hash.hashingPassword(password);
+        String convertedPassword = hash.convertToHexadecimal(userPassword);
 
         if (informations.isPresent()) {
-            if (informations.get().getPassword().equals(password)) {
+            if (informations.get().getPassword().equals(convertedPassword)) {
                 response.setMessage(AuthResponseEnum.USER_AUTHENTICATED.getMessage());
                 response.setTimestamp(LocalDate.now());
                 return response;
