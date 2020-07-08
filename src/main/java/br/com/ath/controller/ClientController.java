@@ -1,7 +1,7 @@
 package br.com.ath.controller;
 
 import br.com.ath.entities.dto.ClientDTO;
-import br.com.ath.exception.DuplicateClientException;
+import br.com.ath.exception.UserAlreadyExistsException;
 import br.com.ath.service.ClientService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<Boolean> createLogin(@RequestBody(required = true) ClientDTO request) throws DuplicateClientException {
+    public ResponseEntity<Boolean> createLogin(@RequestBody(required = true) ClientDTO request) throws UserAlreadyExistsException {
         return ResponseEntity.ok().body(service.registerClient(request));
     }
 }
