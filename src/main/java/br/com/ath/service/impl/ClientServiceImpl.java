@@ -11,12 +11,9 @@ import br.com.ath.service.ClientService;
 import br.com.ath.utils.HashingUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Optional;
 
 @Service
@@ -40,11 +37,10 @@ public class ClientServiceImpl implements ClientService {
             throw new DuplicateClientException(AuthResponseEnum.USER_ALREADY_EXISTS.getMessage());
         }
 
-        byte[] password = hash.hashingPassword(request.getPassword());
+        byte[] password = hash.hashPassword(request.getPassword());
+        String securityPassword = hash.convertToHexadecimal(password);
 
-        String hashingPassword = hash.convertToHexadecimal(password);
-
-        client.setPassword(hashingPassword);
+        client.setPassword(securityPassword);
 
         repository.save(client);
         log.info("USER CREATED");
@@ -58,7 +54,7 @@ public class ClientServiceImpl implements ClientService {
         AuthClientResponseDTO response = new AuthClientResponseDTO();
 
         Optional<Client> informations = repository.findByLogin(login);
-        byte[] userPassword = hash.hashingPassword(password);
+        byte[] userPassword = hash.hashPassword(password);
         String convertedPassword = hash.convertToHexadecimal(userPassword);
 
         if (informations.isPresent()) {

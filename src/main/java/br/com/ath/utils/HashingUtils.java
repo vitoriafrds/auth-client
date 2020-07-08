@@ -15,14 +15,13 @@ public class HashingUtils {
     private static final String SHA_256 = "SHA-256";
     private static final String UTF_8 = "UTF-8";
 
-    public byte[] hashingPassword(String password) {
+    public byte[] hashPassword(String password) {
 
         byte[] digest = null;
 
         try {
             MessageDigest messageDigest = MessageDigest.getInstance(SHA_256);
             digest = messageDigest.digest(password.getBytes(UTF_8));
-
 
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             log.error("error in generate hash {}", e.getMessage());
