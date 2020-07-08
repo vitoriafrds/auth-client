@@ -37,9 +37,7 @@ public class ClientServiceImpl implements ClientService {
             throw new DuplicateClientException(AuthResponseEnum.USER_ALREADY_EXISTS.getMessage());
         }
 
-        byte[] password = hash.hashPassword(request.getPassword());
-        String securityPassword = hash.convertToHexadecimal(password);
-
+        String securityPassword = hash.hashPassword(request.getPassword());
         client.setPassword(securityPassword);
 
         repository.save(client);
@@ -54,8 +52,7 @@ public class ClientServiceImpl implements ClientService {
         AuthClientResponseDTO response = new AuthClientResponseDTO();
 
         Optional<Client> informations = repository.findByLogin(login);
-        byte[] userPassword = hash.hashPassword(password);
-        String convertedPassword = hash.convertToHexadecimal(userPassword);
+        String convertedPassword = hash.hashPassword(password);
 
         if (informations.isPresent()) {
             if (informations.get().getPassword().equals(convertedPassword)) {
