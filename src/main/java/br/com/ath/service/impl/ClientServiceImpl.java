@@ -1,17 +1,19 @@
 package br.com.ath.service.impl;
 
 import br.com.ath.entities.Client;
+import br.com.ath.entities.dto.AuthClientResponseDTO;
 import br.com.ath.entities.dto.ClientDTO;
+import br.com.ath.enumerators.AuthResponseEnum;
 import br.com.ath.exception.DuplicateClientException;
 import br.com.ath.exception.NotAuthenticatedException;
 import br.com.ath.repository.ClientRepository;
 import br.com.ath.service.ClientService;
+import br.com.ath.utils.HashingUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -19,12 +21,12 @@ import java.util.Optional;
 public class ClientServiceImpl implements ClientService {
 
     private ClientRepository repository;
-    private PasswordEncoder passwordEncoder;
+    private HashingUtils hash;
 
     @Autowired
-    public ClientServiceImpl(ClientRepository repository, PasswordEncoder passwordEncoder) {
+    public ClientServiceImpl(ClientRepository repository, HashingUtils hash) {
         this.repository = repository;
-        this.passwordEncoder = passwordEncoder;
+        this.hash = hash;
     }
 
     @Override
@@ -32,8 +34,14 @@ public class ClientServiceImpl implements ClientService {
         Client client = new Client(request);
 
         if (verifyEmail(request.getLogin())) {
-            throw new DuplicateClientException("login already registered");
+            throw new DuplicateClientException(AuthResponseEnum.USER_ALREADY_EXISTS.getMessage());
         }
+
+        byte[] password = hash.hashPassword(request.getPassword());
+        String securityPassword = hash.convertToHexadecimal(password);
+
+        client.setPassword(securityPassword);
+
         repository.save(client);
         log.info("USER CREATED");
 
@@ -41,19 +49,23 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public boolean authenticate(String login, String password) throws NotAuthenticatedException {
+    public AuthClientResponseDTO authenticate(String login, String password) throws NotAuthenticatedException {
+
+        AuthClientResponseDTO response = new AuthClientResponseDTO();
 
         Optional<Client> informations = repository.findByLogin(login);
+        byte[] userPassword = hash.hashPassword(password);
+        String convertedPassword = hash.convertToHexadecimal(userPassword);
 
         if (informations.isPresent()) {
-            if (informations.get().getPassword().equals(password)) {
-                log.info("USER AUTENTICATE");
-                return true;
+            if (informations.get().getPassword().equals(convertedPassword)) {
+                response.setMessage(AuthResponseEnum.USER_AUTHENTICATED.getMessage());
+                response.setTimestamp(LocalDate.now());
+                return response;
             }
-        } else {
-            throw new NotAuthenticatedException("INCORRECT PASSWORD OR LOGIN");
         }
-        return false;
+
+        throw new NotAuthenticatedException(AuthResponseEnum.USER_NOT_AUTHENTICATED.getMessage());
     }
 
 
