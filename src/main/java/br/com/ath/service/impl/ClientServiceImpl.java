@@ -4,7 +4,7 @@ import br.com.ath.entities.Client;
 import br.com.ath.entities.dto.AuthClientResponseDTO;
 import br.com.ath.entities.dto.ClientDTO;
 import br.com.ath.enumerators.AuthResponseEnum;
-import br.com.ath.exception.DuplicateClientException;
+import br.com.ath.exception.UserAlreadyExistsException;
 import br.com.ath.exception.NotAuthenticatedException;
 import br.com.ath.repository.ClientRepository;
 import br.com.ath.service.ClientService;
@@ -30,16 +30,14 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public boolean registerClient(ClientDTO request) throws DuplicateClientException {
+    public boolean registerClient(ClientDTO request) throws UserAlreadyExistsException {
         Client client = new Client(request);
 
         if (verifyEmail(request.getLogin())) {
-            throw new DuplicateClientException(AuthResponseEnum.USER_ALREADY_EXISTS.getMessage());
+            throw new UserAlreadyExistsException(AuthResponseEnum.USER_ALREADY_EXISTS.getMessage());
         }
 
-        byte[] password = hash.hashPassword(request.getPassword());
-        String securityPassword = hash.convertToHexadecimal(password);
-
+        String securityPassword = hash.hashPassword(request.getPassword());
         client.setPassword(securityPassword);
 
         repository.save(client);
@@ -54,8 +52,7 @@ public class ClientServiceImpl implements ClientService {
         AuthClientResponseDTO response = new AuthClientResponseDTO();
 
         Optional<Client> informations = repository.findByLogin(login);
-        byte[] userPassword = hash.hashPassword(password);
-        String convertedPassword = hash.convertToHexadecimal(userPassword);
+        String convertedPassword = hash.hashPassword(password);
 
         if (informations.isPresent()) {
             if (informations.get().getPassword().equals(convertedPassword)) {
